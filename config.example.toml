@@ -1,0 +1,102 @@
+# FailKeep example configuration
+# Copy to: C:\ProgramData\FailKeep\config.toml
+
+[service]
+poll_interval_ms = 1000
+state_file = "C:\\ProgramData\\FailKeep\\state.json"
+log_file = "C:\\ProgramData\\FailKeep\\FailKeep.log"
+log_level = "info"
+# Never auto-ban these (IP or CIDR)
+whitelist = ["127.0.0.1", "10.0.0.0/8", "192.168.0.0/16"]
+# Do not put RFC1918 / loopback into temp/black lists automatically
+ban_private = false
+# Optional PowerShell hooks (env: FailKeep_IP, FailKeep_KIND=ban|unban, FailKeep_TIER)
+# hook_on_ban = "Add-Content -Path C:\\ProgramData\\FailKeep\\bans.txt -Value \"$env:FailKeep_IP $env:FailKeep_TIER\""
+# hook_on_unban = ""
+
+[lists]
+# First threshold → temporary blacklist
+temp_bantime = 600
+temp_ban_refresh = false
+# After temp expires and fails again → blacklist
+# "timed" = auto-clear after black_bantime; "permanent" = until manual unban
+blacklist_mode = "timed"
+black_bantime = 86400
+# 0 = remember "was temp-banned" forever; >0 seconds to forget
+escalation_memory = 0
+
+[firewall]
+rule_prefix = "FailKeep"
+backend = "netsh"
+# "all" = block every inbound port from that IP; or e.g. "3389,22"
+ban_ports = "all"
+
+[geo]
+enabled = false
+database = "C:\\ProgramData\\FailKeep\\geo\\GeoLite2-Country.mmdb"
+
+[stats]
+max_events = 20000
+retain_days = 90
+
+# —— RDP / interactive logon failures (requires audit) ——
+[[jail]]
+name = "rdp"
+enabled = true
+max_retry = 5
+find_time = 600
+
+[jail.source]
+type = "eventlog"
+channel = "Security"
+event_ids = [4625]
+# Network + RemoteInteractive only
+logon_types = [3, 10]
+ignore_users = ["DWM-1", "UMFD-0"]
+success_event_ids = [4624]
+success_logon_types = [3, 10]
+unban_on_success = false
+ip_field = "IpAddress"
+
+# —— Windows OpenSSH (file tail) ——
+[[jail]]
+name = "ssh"
+enabled = true
+max_retry = 5
+find_time = 600
+
+[jail.source]
+type = "file"
+path = "C:\\ProgramData\\ssh\\logs\\sshd.log"
+
+[jail.filter]
+pattern = '(?i)failed (?:password|publickey|none) for (?:invalid user )?\S+ from (?P<ip>\d+\.\d+\.\d+\.\d+)'
+
+# —— IIS auth failures ——
+[[jail]]
+name = "iis-auth"
+enabled = false
+max_retry = 10
+find_time = 300
+
+[jail.source]
+type = "iis"
+path = "C:\\inetpub\\logs\\LogFiles\\W3SVC*\\u_ex*.log"
+status_codes = [401, 403]
+
+# —— Custom app log ——
+[[jail]]
+name = "custom-app"
+enabled = false
+max_retry = 3
+find_time = 60
+
+[jail.source]
+type = "file"
+path = "C:\\app\\logs\\auth.log"
+# Optional in-line timestamps (fallback: receive time)
+# date_pattern = '^(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'
+# date_format = '[year]-[month]-[day] [hour]:[minute]:[second]'
+
+[jail.filter]
+pattern = 'Failed password for .* from (?P<ip>\d+\.\d+\.\d+\.\d+)'

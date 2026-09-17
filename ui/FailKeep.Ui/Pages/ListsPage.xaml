@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="FailKeep.Ui.Pages.ListsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid RowSpacing="12" Padding="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="名单" Style="{StaticResource TitleTextBlockStyle}"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+            <ComboBox x:Name="TierBox" SelectedIndex="0" MinWidth="140">
+                <ComboBoxItem Content="全部" Tag=""/>
+                <ComboBoxItem Content="白名单" Tag="whitelist"/>
+                <ComboBoxItem Content="临时黑名单" Tag="temp"/>
+                <ComboBoxItem Content="黑名单" Tag="black"/>
+            </ComboBox>
+            <Button Content="刷新" Click="Refresh_Click"/>
+            <Button Content="解封选中" Click="Unban_Click"/>
+            <TextBox x:Name="IpBox" PlaceholderText="IP" MinWidth="160"/>
+            <Button Content="加白" Click="WhitelistAdd_Click"/>
+            <Button Content="手动临时封" Click="BanTemp_Click"/>
+            <Button Content="手动黑名单" Click="BanBlack_Click"/>
+        </StackPanel>
+        <ListView Grid.Row="2" x:Name="List">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Ip}" FontFamily="Consolas"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Tier}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Detail}" Opacity="0.7"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>
