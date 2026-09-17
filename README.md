@@ -1,8 +1,10 @@
 # FailKeep
 
+**English** | [简体中文](README.zh-CN.md)
+
 Lightweight fail2ban-style IP ban service for Windows Server (Rust).
 
-- **Slim package**: `FailKeep.exe` (Windows service + CLI) — no UI dependencies
+- **Slim package**: `failkeep.exe` (Windows service + CLI) — no UI dependencies
 - **Full package**: slim + optional WinUI 3 management app (`ui/FailKeep.Ui`)
 
 ## Features
@@ -25,7 +27,7 @@ cargo build --release
 cargo build --release --features geo
 ```
 
-Binary: `target\release\FailKeep.exe`
+Binary: `target\release\failkeep.exe`
 
 ## Quick start
 
@@ -35,14 +37,14 @@ New-Item -ItemType Directory -Force C:\ProgramData\FailKeep
 Copy-Item config.example.toml C:\ProgramData\FailKeep\config.toml
 # edit whitelist / jails
 
-.\target\release\FailKeep.exe check-config
-.\target\release\FailKeep.exe install          # registers service FailKeep
+.\target\release\failkeep.exe check-config
+.\target\release\failkeep.exe install          # registers service FailKeep
 sc start FailKeep
-.\target\release\FailKeep.exe status
+.\target\release\failkeep.exe status
 
 # Foreground debug
-.\target\release\FailKeep.exe run
-.\target\release\FailKeep.exe run --dry-run    # no firewall changes
+.\target\release\failkeep.exe run
+.\target\release\failkeep.exe run --dry-run    # no firewall changes
 ```
 
 Enable audit policy for RDP (Security 4625/4624):
@@ -55,18 +57,18 @@ auditpol /set /subcategory:"登录" /success:enable /failure:enable
 ## CLI
 
 ```
-FailKeep run [--dry-run]     # foreground + IPC server
-FailKeep check-config
-FailKeep status
-FailKeep list [--whitelist|--temp|--black]
-FailKeep stats
-FailKeep jail <name>
-FailKeep ban <ip> [--black] [--permanent] [--time s]
-FailKeep unban <ip> | --all
-FailKeep unblack <ip>
-FailKeep whitelist add|remove <ip>
-FailKeep purge-rules
-FailKeep install | uninstall [--purge-rules]
+failkeep run [--dry-run]     # foreground + IPC server
+failkeep check-config
+failkeep status
+failkeep list [--whitelist|--temp|--black]
+failkeep stats
+failkeep jail <name>
+failkeep ban <ip> [--black] [--permanent] [--time s]
+failkeep unban <ip> | --all
+failkeep unblack <ip>
+failkeep whitelist add|remove <ip>
+failkeep purge-rules
+failkeep install | uninstall [--purge-rules]
 ```
 
 Default config: `C:\ProgramData\FailKeep\config.toml` (`--config` to override).
